@@ -6,7 +6,7 @@
 /* Detail :                                                                   */
 /* Date   : 2017/05/22                                                        */
 /* Author : Akihiro Kashiwagi                                                 */
-/* E-mail : kashiwagi@gridsolar.jp                                            */
+/* E-mail : a-kashiwagi@hotmail.com                                           */
 /*                                                                            */
 /* Replace -------------------------------------------------------------------*/
 /*                                                                            */
@@ -41,7 +41,7 @@
 /* Detail :                                                                   */
 /* Date   : 2017/05/22                                                        */
 /* Author : Akihiro Kashiwagi                                                 */
-/* E-mail : kashiwagi@gridsolar.jp                                            */
+/* E-mail : a-kashiwagi@hotmail.com                                           */
 /*                                                                            */
 /* Replace -------------------------------------------------------------------*/
 /*                                                                            */
@@ -154,7 +154,7 @@ private:
 /* Detail :                                                                   */
 /* Date   : 2017/05/22                                                        */
 /* Author : Akihiro Kashiwagi                                                 */
-/* E-mail : kashiwagi@gridsolar.jp                                            */
+/* E-mail : a-kashiwagi@hotmail.com                                           */
 /*                                                                            */
 /* Replace -------------------------------------------------------------------*/
 /*                                                                            */
@@ -435,7 +435,7 @@ public:
 /* Detail :                                                                   */
 /* Date   : 2017/05/22                                                        */
 /* Author : Akihiro Kashiwagi                                                 */
-/* E-mail : kashiwagi@gridsolar.jp                                            */
+/* E-mail : a-kashiwagi@hotmail.com                                           */
 /*                                                                            */
 /* Replace -------------------------------------------------------------------*/
 /*                                                                            */
@@ -522,10 +522,30 @@ public:
 		return 0;
 	}
 
+/******************************************************************************/
+/*                                                                            */
+/* Title  : Callback for imu/update_calibration                               */
+/* Method Name : update_calibration                                           */
+/*                                                                            */
+/* Detail :                                                                   */
+/* Date   : 2017/05/23                                                        */
+/* Author : Akihiro Kashiwagi                                                 */
+/* E-mail : a-kashiwagi@hotmail.com                                           */
+/*                                                                            */
+/* Replace -------------------------------------------------------------------*/
+/*                                                                            */
+/* Date   :                                                                   */
+/* Author :                                                                   */
+/* Deteil :                                                                   */
+/*                                                                            */
+/*-------+---------+---------+---------+---------+---------+---------+--------*/
+/*3456789012345678901234567890123456789012345678901234567890123456789012345678*/
+/******************************************************************************/
+
 	void update_calibration(const std_msgs::Int32::ConstPtr& msg){
 
 		ROS_INFO("Calibration start...");
-		calib_cnt = 100 * 10;
+		calib_cnt = rate * calib_sec;
 	}
 
 /******************************************************************************/
@@ -536,7 +556,7 @@ public:
 /* Detail :                                                                   */
 /* Date   : 2017/05/22                                                        */
 /* Author : Akihiro Kashiwagi                                                 */
-/* E-mail : kashiwagi@gridsolar.jp                                            */
+/* E-mail : a-kashiwagi@hotmail.com                                           */
 /*                                                                            */
 /* Replace -------------------------------------------------------------------*/
 /*                                                                            */
@@ -674,7 +694,7 @@ public:
 /* Detail :                                                                   */
 /* Date   : 2017/05/22                                                        */
 /* Author : Akihiro Kashiwagi                                                 */
-/* E-mail : kashiwagi@gridsolar.jp                                            */
+/* E-mail : a-kashiwagi@hotmail.com                                           */
 /*                                                                            */
 /* Replace -------------------------------------------------------------------*/
 /*                                                                            */
