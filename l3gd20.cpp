@@ -112,6 +112,10 @@ private:
 	double UNIT;
 					// Loop rate
 	double rate;
+					// Publish rate
+	int publish_rate;
+					// Publish counter
+	int publish_cnt;
 					// Calibration time[s]
 	double calib_sec;
 
@@ -209,15 +213,18 @@ public:
 		sum_y = 0;
 		sum_z = 0;
 
+		publish_cnt = 0;
+
 					// Parameters
 		node.param("rate", rate, 100.0);
 		node.param("calibration_second", calib_sec, 10.0);
 		node.param("unit", UNIT, 0.0175);
+		node.param("publish_rate", publish_rate, 100);
 
 		node.param(
 			"orientation_covariance_0",
 			 orientation_covariance_0,
-			1e6
+			1000000.0
 		);
 		node.param(
 			"orientation_covariance_1",
@@ -237,7 +244,7 @@ public:
 		node.param(
 			"orientation_covariance_4",
 			 orientation_covariance_4,
-			1e6
+			1000000.0
 		);
 		node.param(
 			"orientation_covariance_5",
@@ -257,13 +264,13 @@ public:
 		node.param(
 			"orientation_covariance_8",
 			 orientation_covariance_8,
-			1e-6
+			0.000001
 		);
 
 		node.param(
 			"angular_velocity_covariance_0",
 			 angular_velocity_covariance_0,
-			1e6
+			1000000.0
 		);
 		node.param(
 			"angular_velocity_covariance_1",
@@ -283,7 +290,7 @@ public:
 		node.param(
 			"angular_velocity_covariance_4",
 			 angular_velocity_covariance_4,
-			1e6
+			1000000.0
 		);
 		node.param(
 			"angular_velocity_covariance_5",
@@ -303,7 +310,7 @@ public:
 		node.param(
 			"angular_velocity_covariance_8",
 			 angular_velocity_covariance_8,
-			1e-6
+			0.000001
 		);
 
 		node.param(
@@ -410,21 +417,21 @@ public:
 					// Who am I for I2C
 		fd = wiringPiI2CSetup(ID);
 		ROS_INFO("I2C ID: %#x",ID);
-		ROS_INFO("setup return : %d",fd);
+		ROS_INFO("fd: %d",fd);
 
 					// Start senser
 
 		if((wiringPiI2CWriteReg8(fd,0x20,0x0F)) < 0){
-			ROS_INFO("write error register 0x20");
+			ROS_INFO("can't set 0x20");
 		}
-		ROS_INFO("write register:0x20 = 0x0F");
+		ROS_INFO("set: 0x20 = 0x0F");
 
 					// Set range
 
 		if((wiringPiI2CWriteReg8(fd,0x23,0x00)) < 0){
-			ROS_INFO("write error register 0x23");
+			ROS_INFO("can't set 0x23");
 		}
-		ROS_INFO("write register:0x23 = 0x00");
+		ROS_INFO("set: 0x23 = 0x00");
 	}
 
 /******************************************************************************/
@@ -544,7 +551,11 @@ public:
 
 	void update_calibration(const std_msgs::Int32::ConstPtr& msg){
 
-		ROS_INFO("Calibration start...");
+		if( msg != 0 ){
+			calib_sec = (double)msg->data;
+		}
+
+		ROS_INFO("Calibration start... %f[s]",calib_sec);
 		calib_cnt = rate * calib_sec;
 	}
 
@@ -588,11 +599,24 @@ public:
 			calib_cnt--;
 
 			if( calib_cnt == 0 ){
-				calib_x /= rate * calib_sec;
-				calib_y /= rate * calib_sec;
-				calib_z /= rate * calib_sec;
+
+				calib_x = sum_x / (rate * calib_sec);
+				calib_y = sum_y / (rate * calib_sec);
+				calib_z = sum_z / (rate * calib_sec);
+
+				orientation_x = 0;
+				orientation_y = 0;
+				orientation_z = 0;
+
+				raw_orientation_x = 0;
+				raw_orientation_y = 0;
+				raw_orientation_z = 0;
 
 				ROS_INFO("Calibration done.");
+
+				sum_x = 0;
+				sum_y = 0;
+				sum_z = 0;
 			}
 		}
 					// Set timestamp
@@ -635,7 +659,7 @@ public:
 		imu_data.orientation.w = q.w();
 
 					// Publish imu_data
-		imu_data_pub_.publish(imu_data);
+		//imu_data_pub_.publish(imu_data);
 
 					// Set timestamp
 		imu_raw.header.stamp = current_time;
@@ -674,8 +698,21 @@ public:
 		imu_raw.orientation.w = q.w();
 
 					// Publish imu_raw
-		imu_raw_pub_.publish(imu_raw);
+		if( publish_cnt == 0 ){
 
+			publish_cnt = publish_rate;
+		}
+
+		if( publish_cnt != 0 ){
+
+			publish_cnt--;
+
+			if( publish_cnt == 0 ){
+
+				imu_raw_pub_.publish(imu_raw);
+				imu_data_pub_.publish(imu_data);
+			}
+		}
 					// Store current time
 		last_time = current_time;
 
@@ -709,6 +746,7 @@ public:
 int main(int argc, char **argv){
 
 	double rate;
+	double publish_rate;
 					// ROS init
 	ros::init(argc, argv, "l3gd20");
 					// Time init
@@ -717,12 +755,14 @@ int main(int argc, char **argv){
 	ros::NodeHandle node;
 
 	node.param("rate", rate, 100.0);
+	node.param("publish_rate", publish_rate, 100.0);
 
 					// Set rate[Hz]
 	ros::Rate loop_rate(rate);
 					// Messages
 	ROS_INFO("Start IMU STMicro L3GD20 MEMS Gyro.");
 	ROS_INFO("Sampling rate: %f[Hz]", rate);
+	ROS_INFO("Publish  rate: %f[Hz]", rate / publish_rate);
 
 					// IMU instance
 	ImuL3GD20 l3gd20;
