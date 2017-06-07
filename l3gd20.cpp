@@ -668,21 +668,25 @@ public:
 		imu_raw.header.frame_id = imu_frame_id_;
 
 					// Set angular velocitys xyz
-		imu_raw.angular_velocity.x = imu_data.angular_velocity.x;
-		imu_raw.angular_velocity.y = imu_data.angular_velocity.y;
-		imu_raw.angular_velocity.z = imu_data.angular_velocity.z;
+		//imu_raw.angular_velocity.x = imu_data.angular_velocity.x;
+		//imu_raw.angular_velocity.y = imu_data.angular_velocity.y;
+		//imu_raw.angular_velocity.z = imu_data.angular_velocity.z;
+
+		imu_raw.angular_velocity.x = x * M_PI / 180 * (-1.0);
+		imu_raw.angular_velocity.y = y * M_PI / 180;
+		imu_raw.angular_velocity.z = z * M_PI / 180 * (-1.0);
 
 					// Summary orientations
 		raw_orientation_x
-			+= last_orientation_x
+			= last_orientation_x
 			+ imu_data.angular_velocity.x * dt;
 
 		raw_orientation_y
-			+= last_orientation_y
+			= last_orientation_y
 			+ imu_data.angular_velocity.y * dt;
 
 		raw_orientation_z
-			+= last_orientation_z
+			= last_orientation_z
 			+ imu_data.angular_velocity.z * dt;
 
 					// Transfer to quaternion
